@@ -1,4 +1,3 @@
-
 def main():
     with open('input') as f:
         output = [l.strip() for l in f.readlines()][1:]
@@ -15,14 +14,11 @@ def main():
         else:
             size_or_type, name = i.split()
             if size_or_type.isnumeric():
-                tree[pwd] = tree.get(pwd, 0)
-                tree[pwd] += int(size_or_type)
-                
-                parent_crawl = pwd
-                while parent_crawl != '/':
-                    parent_crawl = parent_crawl.rsplit('/', 2)[0] + '/'
-                    tree[parent_crawl] = tree.get(parent_crawl, 0)
-                    tree[parent_crawl] += int(size_or_type) 
+                parent_dirs = []
+                for slash in range(1, pwd.count('/') + 1):
+                    parent_dirs.append(pwd.rsplit('/', slash)[0] + '/')
+                for d in parent_dirs:
+                    tree[d] = (tree.get(d, 0) + int(size_or_type))
 
     small_dirs = [d for d in tree if tree[d] <= 100000]
 
