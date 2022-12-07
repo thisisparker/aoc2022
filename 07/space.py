@@ -5,13 +5,13 @@ def main():
     tree = {}
     parent_dirs = ['/']
     for i in output:
-        pwd = parent_dirs[-1]
         if i.startswith('$ cd'):
             dst = i.split()[2]
             if dst == '..':
                 parent_dirs.pop()
             else:
-                parent_dirs.append(pwd + dst + '/')
+                cwd = parent_dirs[-1]
+                parent_dirs.append(cwd + dst + '/')
 
         elif i.startswith('$ ls'):
             continue
