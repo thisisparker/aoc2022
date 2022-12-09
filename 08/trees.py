@@ -2,63 +2,48 @@ def main():
     with open('input') as f:
         tree_rows = [l.strip() for l in f.readlines()]
 
-    visible_trees = 0
     rows = len(tree_rows)
     cols = len(tree_rows[0])
+    sightlines = {}
 
     for y in range(rows):
         for x in range(cols):
-            h = int(tree_rows[y][x])
-            obs_e = ''.join([t for t in tree_rows[y][x+1:] if int(t) >= h])
-            obs_w = ''.join([t for t in tree_rows[y][:x] if int(t) >= h])
-            obs_n = ''.join([t for r in range(y)
-                                        for t in tree_rows[r][x] if int(t) >= h])
-            obs_s = ''.join([t for r in range(y+1, rows) 
-                                        for t in tree_rows[r][x] if int(t) >= h])
+            dirs = []
+            # view looking north
+            dirs.append(''.join([t for r in range(y)
+                                    for t in tree_rows[r][x]][::-1]))
+            # view looking east
+            dirs.append(tree_rows[y][x+1:])
+            # view looking south
+            dirs.append(''.join([t for r in range(y+1, rows)
+                                    for t in tree_rows[r][x]]))
+            # view looking west
+            dirs.append(tree_rows[y][:x][::-1])
 
-            if not(obs_e) or not(obs_w) or not(obs_n) or not(obs_s):
+            sightlines[(x,y)] = dirs
+
+    visible_trees = 0
+    for k in sightlines:
+        for d in sightlines[k]:
+            if not any(int(t) >= int(tree_rows[k[1]][k[0]]) for t in d):
                 visible_trees += 1
+                break
 
     print(visible_trees)
 
-    t = tree_rows
+    scenic_scores = []
+    for k in sightlines:
+        scenic_score = 1
+        for d in sightlines[k]:
+            view_distance = 0
+            for t in d:
+                view_distance += 1
+                if int(t) >= int(tree_rows[k[1]][k[0]]):
+                    break
+            scenic_score = scenic_score * view_distance
+        scenic_scores.append(scenic_score)
 
-    scenic_scores = {}
-    for y in range(rows):
-        for x in range(cols):
-            h = int(tree_rows[y][x])
-            views = {'n':0,'s':0,'e':0,'w':0}
-            n = y - 1
-            while n >= 0:
-                views['n'] += 1
-                if int(t[n][x]) >= h:
-                    break
-                else:
-                    n -= 1
-            s = y + 1
-            while s < rows:
-                views['s'] += 1
-                if int(t[s][x]) >= h:
-                    break
-                else:
-                    s += 1
-            e = x + 1
-            while e < cols:
-                views['e'] += 1
-                if int(t[y][e]) >= h:
-                    break
-                else:
-                    e += 1
-            w = x - 1
-            while w >= 0:
-                views['w'] += 1
-                if int(t[y][w]) >= h:
-                    break
-                else:
-                    w -= 1
-            scenic_scores[(x,y)] = views['n'] * views['s'] * views['e'] * views['w']
-
-    print(max(scenic_scores.values()))
+    print(max(scenic_scores))
 
 if __name__ == '__main__':
     main()
